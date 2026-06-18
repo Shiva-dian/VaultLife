@@ -1,0 +1,114 @@
+services:
+
+  # ============================================================
+  # STANDBY REPLICA
+  # ============================================================
+  standby:
+    image: postgres:15-alpine
+    container_name: vaultlife_standby
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: vaultlife_db
+      POSTGRES_USER: vaultlife_user
+      POSTGRES_PASSWORD: VaultLife@dian2026
+
+      # EXISTING PRIMARY CONTAINER
+      PRIMARY_HOST: vaultlife_postgres
+      PRIMARY_PORT: 5432
+
+      REPLICATOR_USER: replicator
+      REPLICATOR_PASSWORD: VaultLife@diantech2026
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - standby_data:/var/lib/postgresql/data
+      - ./standby-postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./standby-pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./init-standby.sh:/docker-entrypoint-initdb.d/init-standby.sh:ro
+
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vaultlife_user -d vaultlife_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - vaultlife_net
+
+  # ============================================================
+  # BACKUP CONTAINER
+  # ============================================================
+  pgbackup:
+    image: postgres:15-alpine
+    container_name: vaultlife_backup
+    restart: unless-stopped
+
+    environment:
+      PGPASSWORD: VaultLife@dian2026
+      BACKUP_DIR: /backups
+
+    volumes:
+      - backups:/backups
+      - ./backup-cron.sh:/usr/local/bin/backup-cron.sh:ro
+
+    command: >
+      sh -c "
+      chmod +x /usr/local/bin/backup-cron.sh &&
+      echo '0 2 * * * /usr/local/bin/backup-cron.sh >> /var/log/backup.log 2>&1' | crontab - &&
+      crond -f
+      "
+
+    depends_on:
+      standby:
+        condition: service_healthy
+
+    networks:
+      - vaultlife_net
+
+  # ============================================================
+  # REPLICATION MONITOR
+  # ============================================================
+  repl_monitor:
+    image: postgres:15-alpine
+    container_name: vaultlife_repl_monitor
+    restart: unless-stopped
+
+    environment:
+      PGPASSWORD: VaultLife@dian2026
+      PRIMARY_HOST: vaultlife_postgres
+
+    volumes:
+      - ./monitor.sh:/usr/local/bin/monitor.sh:ro
+
+    command: >
+      sh -c "
+      chmod +x /usr/local/bin/monitor.sh &&
+      while true; do
+        /usr/local/bin/monitor.sh
+        sleep 60
+      done
+      "
+
+    networks:
+      - vaultlife_net
+
+volumes:
+  standby_data:
+    external: true
+    name: replication_standby_data
+  backups:
+    external: true
+    name: replication_backups
+
+networks:
+  vaultlife_net:
+    external: true
+    name: vaultlife-auth_default

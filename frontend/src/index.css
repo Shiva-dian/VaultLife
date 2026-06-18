@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --blue-primary:   #1e40af;
+    --blue-mid:       #2563eb;
+    --blue-light:     #3b82f6;
+    --blue-pale:      #dbeafe;
+    --blue-ghost:     #eff6ff;
+    --white:          #ffffff;
+    --grey-50:        #f8fafc;
+    --grey-100:       #f1f5f9;
+    --grey-200:       #e2e8f0;
+    --grey-400:       #94a3b8;
+    --grey-600:       #475569;
+    --grey-800:       #1e293b;
+    --success:        #16a34a;
+    --error:          #dc2626;
+    --warning:        #d97706;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    @apply m-0 p-0 antialiased;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: #eff6ff;
+    color: #1e293b;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    @apply font-bold;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #eff6ff inset;
+    -webkit-text-fill-color: #1e293b;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  ::selection {
+    background: #bfdbfe;
+    color: #1e3a8a;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+  ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+}
+
+@layer components {
+  /* ── Input Base ── */
+  .input-base {
+    @apply w-full px-4 py-3 rounded-xl border border-blue-200 bg-blue-50/50
+           text-slate-800 placeholder-slate-400 text-sm
+           outline-none transition-all duration-200
+           focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .input-base.error {
+    @apply border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-500/20;
+  }
+  .input-base:disabled {
+    @apply opacity-50 cursor-not-allowed bg-slate-100;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply w-full py-3.5 px-6 rounded-xl font-semibold text-sm text-white
+           bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+           transition-all duration-200 shadow-md hover:shadow-lg
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600
+           focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2;
+    letter-spacing: 0.3px;
+  }
+  .btn-secondary {
+    @apply w-full py-3.5 px-6 rounded-xl font-semibold text-sm text-blue-700
+           bg-white border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-2;
+  }
+  .btn-link {
+    @apply text-blue-600 hover:text-blue-800 font-medium text-sm
+           underline-offset-2 hover:underline transition-colors duration-150;
+  }
+
+  /* ── Card ── */
+  .auth-card {
+    @apply bg-white rounded-2xl shadow-card border border-blue-100/50
+           animate-slide-up;
+  }
+
+  /* ── OTP Input ── */
+  .otp-digit {
+    @apply w-12 h-14 text-center text-xl font-bold font-mono
+           rounded-xl border-2 border-blue-200 bg-blue-50/50
+           text-blue-900 outline-none
+           transition-all duration-200
+           focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white
+           hover:border-blue-300;
+  }
+  .otp-digit.filled {
+    @apply border-blue-500 bg-blue-50;
+  }
+  .otp-digit.error {
+    @apply border-red-400 bg-red-50 text-red-700;
+  }
+
+  /* ── Label ── */
+  .field-label {
+    @apply block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide;
+  }
+
+  /* ── Badge ── */
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           text-xs font-semibold text-emerald-700 bg-emerald-100;
+  }
+  .badge-error {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           text-xs font-semibold text-red-700 bg-red-100;
+  }
+
+  /* ── Step indicator dot ── */
+  .step-dot {
+    @apply w-2 h-2 rounded-full transition-all duration-300;
+  }
+  .step-dot.active  { @apply bg-blue-600 w-6; }
+  .step-dot.done    { @apply bg-blue-400; }
+  .step-dot.pending { @apply bg-blue-200; }
+
+  /* ── Password strength bar ── */
+  .strength-bar {
+    @apply h-1 rounded-full transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-grid-blue {
+    background-image:
+      linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .bg-dots-blue {
+    background-image: radial-gradient(rgba(37,99,235,0.15) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+
+  .glass-blue {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* Staggered animation helpers */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
+
+  .opacity-0-init { opacity: 0; }
+}
