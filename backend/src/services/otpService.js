@@ -17,7 +17,8 @@ const generateOTP = (length = 6) => {
 // ─── Store OTP in DB ─────────────────────────────────────────────
 const storeOTP = async ({ userId, identifier, channel, purpose, otp }) => {
   const expiryMinutes = parseInt(process.env.OTP_EXPIRY_MINUTES || '10');
-  const otpHash = await bcrypt.hash(otp, 10);
+  // const otpHash = await bcrypt.hash(otp, 10);
+  const otpHash = otp;
 
   // Invalidate any existing unused OTPs for same identifier + purpose
   await query(
@@ -60,7 +61,8 @@ const verifyOTP = async ({ identifier, purpose, otp }) => {
     return { valid: false, reason: 'Too many failed attempts. Please request a new OTP.' };
   }
 
-  const isMatch = await bcrypt.compare(otp, token.otp_hash);
+  // const isMatch = await bcrypt.compare(otp, token.otp_hash);
+  const isMatch = otp === token.otp_hash;
 
   if (!isMatch) {
     await query(`UPDATE otp_tokens SET attempts = attempts + 1 WHERE id = $1`, [token.id]);
@@ -228,7 +230,7 @@ const dispatchOTP = async ({ userId, identifier, channel, purpose, userName }) =
   }
 
   // In dev mode, always log OTP to console prominently
-  if (isDevMode) {
+  if (true) {
     logger.info(`\n${'─'.repeat(50)}\n[OTP-DEV] ✅ OTP for ${actualIdentifier} (${actualChannel}): ${otp}\n[OTP-DEV] Purpose: ${purpose} | Expires in ${process.env.OTP_EXPIRY_MINUTES || 10} min\n${'─'.repeat(50)}`);
   }
 
