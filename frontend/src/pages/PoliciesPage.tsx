@@ -59,6 +59,35 @@ const emptyForm = {
   nomineeName: '', agentName: '', agentPhone: '', insurerHelpline: '', notes: '',
 };
 
+// ─────────────────────────────────────────────────────────────────────────
+// IMPORTANT: This field component MUST be defined outside of PoliciesPage.
+// Previously it was defined inside the component body, which meant a brand
+// new component type was created on every re-render (i.e. every keystroke,
+// since typing triggers setForm -> re-render). React then unmounted and
+// remounted the underlying <input> on every render instead of just updating
+// it, so the input lost focus after each character was typed. Keeping it
+// here, outside, gives it a stable identity across renders and fixes that.
+// ─────────────────────────────────────────────────────────────────────────
+interface FieldProps {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  type?: string;
+  required?: boolean;
+  col?: number;
+}
+
+const F: React.FC<FieldProps> = ({ label, value, onChange, placeholder = '', type = 'text', required = false, col = 1 }) => (
+  <div className={col === 2 ? 'col-span-2' : ''}>
+    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+      {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+    </label>
+    <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all" />
+  </div>
+);
+
 const PoliciesPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -148,16 +177,6 @@ const PoliciesPage: React.FC = () => {
     try { await policiesApi.remove(id); toast$('success', 'Policy removed.'); load(); }
     catch { toast$('error', 'Failed to remove.'); }
   };
-
-  const F = ({ label, value, onChange, placeholder = '', type = 'text', required = false, col = 1 }: any) => (
-    <div className={col === 2 ? 'col-span-2' : ''}>
-      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      <input type={type} value={value} onChange={onChange} placeholder={placeholder}
-        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all" />
-    </div>
-  );
 
   const needsVehicle = ['car', 'bike'].includes(form.category);
   const needsProperty = form.category === 'home';
